@@ -2,8 +2,8 @@ import sys
 
 from random import randrange
 
-from PyQt5.QtWidgets import QMainWindow, QFrame,  QApplication, QDesktopWidget
-from PyQt5.QtGui import QPen, QFont, QPainter, QColor
+from PyQt5.QtWidgets import QMainWindow, QFrame, QApplication, QDesktopWidget
+from PyQt5.QtGui import QPen, QFont, QPainter, QColor, QIcon
 from PyQt5.QtCore import Qt, QBasicTimer
 
 
@@ -18,6 +18,7 @@ class Snake(QMainWindow):
         self.newGame()
         self.resize(600, 610)
         self.center
+        self.setWindowIcon(QIcon('snake-icon.png'))
         self.setWindowTitle('Snake')
         self.show()
 
@@ -59,7 +60,7 @@ class Snake(QMainWindow):
         elif enter.key() == Qt.Key_Escape:
             self.close()
 
-    def newGame(self):
+    def newGame(self):  # метод нагло "позоимствован" из интернета
         self.score = 0
         self.x = 300
         self.y = 300
@@ -84,7 +85,7 @@ class Snake(QMainWindow):
         self.timer.start(self.speed, self)
         self.update()
 
-    def movement(self):
+    def movement(self):  # движение змейки посредством добавления нового элемента с новыми координатами в начало списка
         if self.lastKeyPress == 'DOWN' and self.check(self.x, self.y + 20):
             self.y += 20
             if self.y == 580:
@@ -108,8 +109,7 @@ class Snake(QMainWindow):
 
         self.update()
 
-
-    def information(self, event, qp):
+    def information(self, event, qp):  # инфо-блок, ничего необычного
         qp.setPen(QColor(0, 0, 0))
         qp.setFont(QFont('Decorative', 14))
         qp.drawText(20, 17, "Текущий счёт: " + str(self.score))
@@ -133,12 +133,13 @@ class Snake(QMainWindow):
         qp.drawText(223, 310, "GAME OVER")
 
     def check(self, x, y):
-
+        # дабы змейка не проходила сквозь себя
         if self.snakeArray[0] in self.snakeArray[1:len(self.snakeArray)]:
             self.pause()
             self.isPaused = True
             self.isOver = True
             return False
+        # столкновение с едой, подсчёт очков и увеличение скорости змейки
         elif self.y == self.foody and self.x == self.foodx:
             self.FoodPlaced = False
             self.score += 1
@@ -155,12 +156,11 @@ class Snake(QMainWindow):
                 self.speed = 25
                 self.timer.start(self.speed, self)
             return True
-        self.snakeArray.pop()
+        self.snakeArray.pop()  # контроль длины змейки
         return True
 
-    def drawSpeedo(self,  qp):
+    def drawSpeedo(self, qp):  # своеобразный спидометр, 5 квадратов над полем
         qp.setPen(QPen(Qt.black, 1, Qt.SolidLine))
-
         qp.setBrush(QColor(128, 255, 0, 255))
         qp.drawRect(260, 3, 16, 16)
         if self.speed <= 100:
@@ -189,10 +189,10 @@ class Snake(QMainWindow):
         qp.drawRect(20, 20, 560, 560)
         qp.setPen(QPen(Qt.black, 1, Qt.DotLine))
         for i in range(2, 29):
-            qp.drawLine(i*20, 20, i*20, 580)
-            qp.drawLine(20, i*20, 580, i*20)
+            qp.drawLine(i * 20, 20, i * 20, 580)
+            qp.drawLine(20, i * 20, 580, i * 20)
 
-    def drawFood(self, qp):
+    def drawFood(self, qp):  # еда появится где угодно, кроме местоположения змеи
         if self.FoodPlaced == False:
             self.foodx = randrange(2, 29) * 20
             self.foody = randrange(2, 29) * 20
@@ -207,9 +207,8 @@ class Snake(QMainWindow):
         qp.setBrush(QColor(50, 70, 50, 255))
         for i in self.snakeArray:
             qp.drawRect(i[0], i[1], 20, 20)
-            self.update()
 
-    def timerEvent(self, event):
+    def timerEvent(self, event):  # на zetcode сказано сделать так,
         if event.timerId() == self.timer.timerId():
             self.movement()
         else:
